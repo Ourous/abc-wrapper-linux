@@ -1,0 +1,18 @@
+.comp 920 0101110100100
+.start __start
+.endinfo
+.export __start
+.o 0 0
+__start
+	build _ 0 make_hello
+.d 1 0
+	jmp _driver
+.o 1 0
+make_hello
+	push_node _cycle_in_spine 0
+.d 0 0
+	buildAC "Hello, World!"
+.o 1 0
+	fillh ARRAY 1 1
+.d 1 0
+	rtn

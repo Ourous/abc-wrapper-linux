@@ -1,0 +1,9 @@
+A minimal wrapper around the code generator and linker for Clean, allowing ABC-assembly to be hand-written and compiled into an executable.
+
+Requires Clean (clean.cs.ru.nl) be installed and `$CLEAN_HOME` be set properly.
+
+Usage: `abc.sh input_file -o=output_file --clmlink=<clmlink_args> --syslink=<system_linker_args> --codegen=<cg_args>`
+
+Features:
+
+ - respects `$TMPDIR` if set
