@@ -10,12 +10,14 @@ fi
 local_path=$(readlink -f "$0")
 local_path=$(dirname "${local_path}")
 
-syslink_cmd="gcc -no-pie"
+syslink_cmd=(gcc -no-pie)
 
-clmlink_args=""
-codegen_args=""
-syslink_args=""
 out_file="a.out"
+in_file=""
+clmlink_args=()
+codegen_args=()
+syslink_args=()
+use_runtime=true
 
 for i in "$@"; do
 	case "$i" in
@@ -23,31 +25,41 @@ for i in "$@"; do
 		out_file="${i#*=}"
 		;;
 	--syslink=*)
-		syslink_args="${i#*=}"
+		syslink_args+=("${i#*=}")
 		;;
 	--clmlink=*)
-		clmlink_args="${i#*=}"
+		clmlink_args+=("${i#*=}")
 		;;
 	--codegen=*)
-		codegen_args="${i#*=}"
+		codegen_args+=("${i#*=}")
+		;;
+	--no-rts)
+		use_runtime=false
 		;;
 	*)
-		file_name="${i}"
+		in_file="${i}"
 		;;
 esac
 done
 
-
 codegen_tmp=$(mktemp "${TMPDIR}/codegenXXXXXX")
 
-eval "${CLEAN_HOME}/lib/exe/cg ${codegen_args} ${file_name} -o ${codegen_tmp}"
+"${CLEAN_HOME}/lib/exe/cg" "${codegen_args[@]}" "${in_file}" -o "${codegen_tmp}"
 
 clmlink_tmp=$(mktemp "${TMPDIR}/clmlinkXXXXXX")
 
-eval "${CLEAN_HOME}/lib/exe/linker ${clmlink_tmp} ${codegen_tmp} ${CLEAN_HOME}/lib/StdEnv/Clean\ System\ Files/_startup.o ${CLEAN_HOME}/lib/StdEnv/Clean\ System\ Files/_system.o ${clmlink_args}"
+if "${use_runtime}"; then
+	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_startup.o" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_system.o" ${clmlink_args}
+else
+	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${clmlink_args[@]}"
+fi
 
 rm "${codegen_tmp}"
 
-eval "${syslink_cmd} -o ${out_file} ${clmlink_tmp} ${local_path}/defaults.o ${syslink_args}"
+if "${use_runtime}"; then
+	"${syslink_cmd[@]}" -o "${out_file}" "${clmlink_tmp}" "${local_path}/defaults.o" "${syslink_args[@]}"
+else
+	"${syslink_cmd[@]}" -o "${out_file}" "${clmlink_tmp}" "${syslink_args[@]}"
+fi
 
 rm "${clmlink_tmp}"
