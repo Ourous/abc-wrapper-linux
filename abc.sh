@@ -49,7 +49,7 @@ codegen_tmp=$(mktemp "${TMPDIR}/codegenXXXXXX")
 clmlink_tmp=$(mktemp "${TMPDIR}/clmlinkXXXXXX")
 
 if "${use_runtime}"; then
-	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_startup.o" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_system.o" ${clmlink_args}
+	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_startup.o" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_system.o" "${clmlink_args[@]}"
 else
 	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${clmlink_args[@]}"
 fi
