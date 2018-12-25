@@ -42,24 +42,21 @@ for i in "$@"; do
 esac
 done
 
+if "${use_runtime}"; then
+	clmlink_args+=("${CLEAN_HOME}/lib/StdEnv/Clean System Files/_startup.o" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_system.o")
+	syslink_args+=("${local_path}/defaults.o")
+fi
+
 codegen_tmp=$(mktemp "${TMPDIR}/codegenXXXXXX")
 
 "${CLEAN_HOME}/lib/exe/cg" "${codegen_args[@]}" "${in_file}" -o "${codegen_tmp}"
 
 clmlink_tmp=$(mktemp "${TMPDIR}/clmlinkXXXXXX")
 
-if "${use_runtime}"; then
-	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_startup.o" "${CLEAN_HOME}/lib/StdEnv/Clean System Files/_system.o" "${clmlink_args[@]}"
-else
-	"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${clmlink_args[@]}"
-fi
+"${CLEAN_HOME}/lib/exe/linker" "${clmlink_tmp}" "${codegen_tmp}" "${clmlink_args[@]}"
 
 rm "${codegen_tmp}"
 
-if "${use_runtime}"; then
-	"${syslink_cmd[@]}" -o "${out_file}" "${clmlink_tmp}" "${local_path}/defaults.o" "${syslink_args[@]}"
-else
-	"${syslink_cmd[@]}" -o "${out_file}" "${clmlink_tmp}" "${syslink_args[@]}"
-fi
+"${syslink_cmd[@]}" -o "${out_file}" "${clmlink_tmp}" "${syslink_args[@]}"
 
 rm "${clmlink_tmp}"
